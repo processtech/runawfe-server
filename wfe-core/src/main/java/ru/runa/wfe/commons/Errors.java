@@ -123,6 +123,19 @@ public class Errors {
         processErrors.remove(processId);
     }
 
+    public static void updateProcessError(ProcessError processError, Throwable th) {
+        List<ProcessError> processErrors = Errors.getProcessErrors(processError.getProcessId());
+        String errorMessage = th.toString();
+        for (ProcessError error : processErrors) {
+            if (error.getNodeId().equals(processError.getNodeId()) && !error.getMessage().equals(errorMessage)) {
+                error.setThrowable(th);
+                error.setOccurredDate(processError.getOccurredDate());
+                sendEmailNotification(error);
+                break;
+            }
+        }
+    }
+
     public static void sendEmailNotification(final SystemError error) {
         if (emailNotificationConfigBytes != null) {
             if (error.getStackTrace() != null) {
