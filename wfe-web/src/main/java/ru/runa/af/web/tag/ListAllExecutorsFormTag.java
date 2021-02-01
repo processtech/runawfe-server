@@ -17,7 +17,6 @@
  */
 package ru.runa.af.web.tag;
 
-import java.util.List;
 import org.apache.ecs.html.TD;
 import org.tldgen.annotations.BodyContent;
 import ru.runa.af.web.BatchPresentationUtils;
@@ -37,12 +36,11 @@ import ru.runa.common.web.html.SortingHeaderBuilder;
 import ru.runa.common.web.html.TdBuilder;
 import ru.runa.common.web.html.TableBuilder;
 import ru.runa.common.web.tag.BatchReturningTitledFormTag;
+import ru.runa.wfe.lang.Delegation;
 import ru.runa.wfe.presentation.BatchPresentation;
 import ru.runa.wfe.security.Permission;
 import ru.runa.wfe.service.delegate.Delegates;
-import ru.runa.wfe.user.Executor;
-import ru.runa.wfe.user.Group;
-import ru.runa.wfe.user.User;
+import ru.runa.wfe.user.*;
 
 /**
  * Created on 18.08.2004
@@ -56,11 +54,27 @@ public class ListAllExecutorsFormTag extends BatchReturningTitledFormTag {
     private static final long serialVersionUID = -7478022960008761625L;
 
     private boolean buttonEnabled;
+    
+        private final Set<Class<? extends TemporaryGroup>> notDisplayableExecutorsByDefault;
+
+    public ListAllExecutorsFormTag() {
+        this.notDisplayableExecutorsByDefault = new HashSet<>();
+        this.notDisplayableExecutorsByDefault.add(TemporaryGroup.class);
+        this.notDisplayableExecutorsByDefault.add(DelegationGroup.class);
+        this.notDisplayableExecutorsByDefault.add(EscalationGroup.class);
+    }
 
     @Override
     protected void fillFormElement(TD tdFormElement) {
-        int executorsCount = Delegates.getExecutorService().getExecutorsCount(getUser(), getBatchPresentation());
+        int executorsCount;
         List<Executor> executors = (List<Executor>) Delegates.getExecutorService().getExecutors(getUser(), getBatchPresentation());
+        boolean displayBasicGroups = WebResources
+                .getResources()
+                .getBooleanProperty("display.only.basic.userGroups", true);
+        if (displayBasicGroups) {
+            executors.removeIf(e -> notDisplayableExecutorsByDefault.contains(e));
+        }
+        executorsCount = executors.size();
         BatchPresentation batchPresentation = getBatchPresentation();
         buttonEnabled = BatchPresentationUtils.isExecutorPermissionAllowedForAnyone(getUser(), executors, batchPresentation, Permission.UPDATE);
         PagingNavigationHelper navigation = new PagingNavigationHelper(pageContext, batchPresentation, executorsCount, getReturnAction());
