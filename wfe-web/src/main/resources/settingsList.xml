@@ -199,7 +199,9 @@
 		</property>
 		<property title="chat.enabled">
 			<value>true</value>
-			<value>false</value></property>
+			<value>false</value>
+		</property>
+		<property title="process.started"/>
 	</properties_file>
 	
 	<properties_file title="office.properties">

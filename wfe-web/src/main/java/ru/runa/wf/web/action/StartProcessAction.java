@@ -17,6 +17,7 @@
  */
 package ru.runa.wf.web.action;
 
+import java.text.MessageFormat;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
@@ -67,7 +68,11 @@ public class StartProcessAction extends ActionBase {
             } else {
                 WfDefinition definition = Delegates.getDefinitionService().getProcessDefinition(getLoggedUser(request), definitionId);
                 Long processId = Delegates.getExecutionService().startProcess(getLoggedUser(request), definition.getName(), null);
-                addMessage(request, new ActionMessage(MessagesProcesses.PROCESS_STARTED.getKey(), processId.toString()));
+                if (WebResources.getProcessStartedMessage() == null) {
+                    addMessage(request, new ActionMessage(MessagesProcesses.PROCESS_STARTED.getKey(), processId.toString()));
+                } else {
+                    addMessage(request, new ActionMessage(MessageFormat.format(WebResources.getProcessStartedMessage(), processId.toString()), false));
+                }
                 forward = mapping.findForward(Resources.FORWARD_SUCCESS);
                 if (WebResources.isAutoShowForm()) {
                     Profile profile = ProfileHttpSessionHelper.getProfile(request.getSession());
