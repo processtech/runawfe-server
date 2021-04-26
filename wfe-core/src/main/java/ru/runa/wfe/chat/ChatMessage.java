@@ -1,5 +1,6 @@
 package ru.runa.wfe.chat;
 
+import java.io.Serializable;
 import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
@@ -17,13 +18,12 @@ import ru.runa.wfe.user.Actor;
 
 @Entity
 @Table(name = "CHAT_MESSAGE")
-public class ChatMessage {
+public class ChatMessage implements Serializable {
     private Long id;
     private Date createDate;
     private Actor createActor;
     private Process process;
     private String text;
-    private String quotedMessageIds;
 
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO, generator = "sequence")
@@ -76,15 +76,6 @@ public class ChatMessage {
 
     public void setText(String text) {
         this.text = text;
-    }
-
-    @Column(name = "QUOTED_MESSAGE_IDS", length = 1024)
-    public String getQuotedMessageIds() {
-        return quotedMessageIds;
-    }
-
-    public void setQuotedMessageIds(String quotedMessageIds) {
-        this.quotedMessageIds = quotedMessageIds;
     }
 
 }
